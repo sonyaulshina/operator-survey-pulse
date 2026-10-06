@@ -19,6 +19,14 @@
     @media(max-width:820px){.title-row{align-items:flex-start;flex-direction:column}.overall-pill{width:100%}.summary-grid{grid-template-columns:repeat(2,1fr)}.project>summary{grid-template-columns:1fr 84px 28px}.risk-preview{grid-column:1/-1;order:3}.metric-grid{grid-template-columns:repeat(2,1fr)}.strength-grid{grid-template-columns:1fr}.risk-copy{grid-template-columns:1fr}.portfolio-head{align-items:flex-start;flex-direction:column}.toolbar-inner{align-items:stretch;flex-direction:column}.sort{width:100%}}
     @media(max-width:500px){.wrap{width:min(100% - 20px,1180px)}.top{padding:26px 0}.summary-grid{grid-template-columns:1fr 1fr;gap:8px}.stat{padding:14px}.stat-value{font-size:1.45rem}.project>summary{padding:16px;gap:10px}.project-body{padding:16px}.metric-grid{grid-template-columns:1fr}.project-name{font-size:1rem}.answer-row{grid-template-columns:1fr;gap:3px}.responses-note{display:none}.mini-score:last-of-type{display:none}}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.chev{transition:none}}
+  
+    .kc-panel{width:100%;display:flex;align-items:center;gap:24px;padding:17px 18px;border:1px solid #cfdcf5;border-radius:18px;background:linear-gradient(110deg,#eaf1ff,#f5f9ff);box-shadow:0 5px 16px rgba(36,107,253,.05)}
+    .kc-heading{display:flex;align-items:center;gap:12px;flex-shrink:0}.kc-symbol{display:grid;place-items:center;width:44px;height:44px;border-radius:13px;background:#fff;color:var(--blue);border:1px solid #d8e4fa}.kc-heading strong{display:block;font-size:.95rem;color:#183258}.kc-heading span:not(.kc-symbol){display:block;font-size:.75rem;color:#607393;margin-top:2px}
+    .kc-options{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;flex:1;min-width:0}.kc-btn{display:flex;align-items:center;justify-content:center;gap:10px;min-height:46px;padding:10px 14px;border:1px solid #d1def4;border-radius:12px;background:#fff;color:#344b6c;font-weight:750;transition:background .15s,border-color .15s,box-shadow .15s}.kc-btn:hover{border-color:#87acf1;background:#f7faff}.kc-count{padding:2px 7px;min-width:28px;border-radius:7px;background:#edf2fb;color:#627795;font-size:.75rem;font-weight:700}.kc-btn[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 4px 12px rgba(36,107,253,.2)}.kc-btn[aria-pressed="true"] .kc-count{background:rgba(255,255,255,.18);color:#fff}
+    [hidden]{display:none!important}
+    @media(max-width:1000px){.kc-panel{align-items:stretch;flex-direction:column;gap:13px}}
+    @media(max-width:500px){.kc-panel{padding:13px;border-radius:15px}.kc-options{grid-template-columns:repeat(2,minmax(0,1fr))}.kc-btn{min-height:43px;padding:8px 10px}.kc-heading span:not(.kc-symbol){font-size:.72rem}.toolbar-inner{gap:10px;padding:10px 0}}
+    @media(prefers-reduced-motion:reduce){.kc-btn{transition:none}}
   </style>
 </head>
 <body>
@@ -31,7 +39,7 @@
       </div>
     </div>
   </header>
-  <nav class="toolbar" aria-label="Фильтры отчёта"><div class="wrap toolbar-inner"><div class="owner-filters" id="ownerFilters"></div><select class="sort" id="kcFilter" aria-label="Фильтр по КЦ"><option value="Все">Все КЦ</option></select><select class="sort" id="sort" aria-label="Сортировка проектов"><option value="risk">Сначала требующие внимания</option><option value="scoreAsc">По оценке: ниже → выше</option><option value="scoreDesc">По оценке: выше → ниже</option><option value="name">По названию</option></select></div></nav>
+  <nav class="toolbar" aria-label="Фильтры отчёта"><div class="wrap toolbar-inner"><section class="kc-panel" aria-label="Выбор контактного центра"><div class="kc-heading"><span class="kc-symbol" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 13v-1a8 8 0 0 1 16 0v1"/><rect x="3" y="11" width="4" height="8" rx="2"/><rect x="17" y="11" width="4" height="8" rx="2"/><path d="M19 19c0 2-3 2-6 2"/></svg></span><div><strong>Контактный центр</strong><span>Выбери КЦ для просмотра результатов</span></div></div><div class="kc-options" id="kcButtons"></div></section><div class="owner-filters" id="ownerFilters"></div><select hidden class="sort" id="kcFilter" aria-label="Фильтр по КЦ"><option value="Все">Все КЦ</option></select><select class="sort" id="sort" aria-label="Сортировка проектов"><option value="risk">Сначала требующие внимания</option><option value="scoreAsc">По оценке: ниже → выше</option><option value="scoreDesc">По оценке: выше → ниже</option><option value="name">По названию</option></select></div></nav>
   <main class="wrap">
     <section class="summary-grid" aria-label="Сводные показатели">
       <div class="stat"><div class="stat-label">Респондентов</div><div class="stat-value" id="statRespondents">66</div><div class="stat-note">в выбранном портфеле</div></div>
@@ -94,7 +102,13 @@
       const responseBlock=`<details class="responses-section"><summary><span>Ответы операторов</span><span class="responses-note">обезличены · закрыты по умолчанию</span><span class="count">${p.responses?.length||0}</span></summary><div class="response-list">${responses}</div></details>`;
       return `<details class="project" ${index===0?"open":""}><summary><div><div class="project-name">${esc(p.project)}</div><div class="meta"><span class="tag ${p.owner==="Не назначен"?"unassigned":""}">${esc(p.owner)}</span><span class="respondents">${p.n} ${p.n===1?"респондент":p.n<5?"респондента":"респондентов"}</span></div></div><div class="score"><strong>${fmt(p.score)}</strong> <span>/ 5</span><div class="score-bar"><i style="width:${p.score/5*100}%"></i></div></div><div class="risk-preview"><strong>${esc(riskText)}</strong><span class="badge ${levelClass(topRisk.level)}">${esc(topRisk.level)}</span></div><span class="chev">⌄</span></summary><div class="project-body"><p class="project-summary">${esc(p.summary)}</p><div class="metric-grid">${metrics}</div><h3 class="section-title">Сильные стороны</h3><div class="strength-grid">${strengths}</div><h3 class="section-title">Факторы демотивации и риски</h3><div class="risk-list">${risks}</div><div class="focus"><b>Фокус для супервизора.</b> ${esc(p.focus)}</div>${responseBlock}</div></details>`;
     }
+    function renderKCButtons(){
+      const centers=["Все", "Телеконтакт", "ICL", "Voxys"];
+      el("kcButtons").innerHTML=centers.map(k=>{const count=sourceResponses.filter(r=>k==="Все"||r.kc===k).length;return `<button class="kc-btn" data-kc="${esc(k)}" aria-pressed="${activeKC===k}"><span class="kc-label">${k==="Все"?"Все КЦ":esc(k)}</span><span class="kc-count">${count}</span></button>`}).join("");
+      document.querySelectorAll(".kc-btn").forEach(button=>button.addEventListener("click",()=>{activeKC=button.dataset.kc;el("kcFilter").value=activeKC;render()}));
+    }
     function render(){
+      renderKCButtons();
       renderFilters();
       const stats=ownerStats(activeOwner);let items=[...stats.items];const sort=el("sort").value;
       if(sort==="risk")items.sort((a,b)=>riskRank(b)-riskRank(a)||a.score-b.score);
